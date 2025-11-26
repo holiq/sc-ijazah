@@ -1,57 +1,149 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# 🎓 Sistem Verifikasi Ijazah Berbasis Blockchain
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
+Smart contract Solidity untuk mengelola dan memverifikasi data ijazah secara terdesentralisasi di Ethereum Sepolia Testnet.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## 📋 Informasi Contract
 
-## Project Overview
+| Item                 | Value                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Network**          | Sepolia Testnet                                                                                       |
+| **Contract Address** | `0xdc4b5c8d191a341d9678757d6e81de35f18041b0`                                                          |
+| **Explorer**         | [Lihat di Etherscan](https://sepolia.etherscan.io/address/0xdc4b5c8d191a341d9678757d6e81de35f18041b0) |
 
-This example project includes:
+---
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+## 🚀 Step-by-Step Penggunaan
 
-## Usage
+### 1️⃣ Install Dependencies
 
-### Running Tests
+```bash
+npm install
+```
 
-To run all the tests in the project, execute the following command:
+### 2️⃣ Setup Environment
 
-```shell
+Buat file `.env` di root folder:
+
+```env
+SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_PROJECT_ID
+SEPOLIA_PRIVATE_KEY=wallet_private_key
+```
+
+**Cara mendapatkan:**
+
+- **RPC URL**: Daftar di [Infura](https://infura.io) atau [Alchemy](https://alchemy.com)
+- **Private Key**: Export dari Metamask (Account Details → Export Private Key)
+- **Test ETH**: Dapatkan dari [Sepolia Faucet](https://sepoliafaucet.com)
+
+### 3️⃣ Compile Smart Contract
+
+```bash
+npx hardhat compile
+```
+
+### 4️⃣ Jalankan Unit Test
+
+```bash
 npx hardhat test
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
+### 5️⃣ Deploy ke Sepolia Testnet
 
-```shell
-npx hardhat test solidity
-npx hardhat test nodejs
+```bash
+npx hardhat run scripts/deploy-sepolia.ts --network sepolia
 ```
 
-### Make a deployment to Sepolia
+**Output:**
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
+```
+✅ DEPLOYMENT SUCCESSFUL!
+📄 Contract Address: 0x...  ← SIMPAN ADDRESS INI!
 ```
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+### 6️⃣ Update Contract Address
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
+Buka `scripts/interact-sepolia.ts` dan ganti `CONTRACT_ADDRESS` dengan address hasil deploy:
 
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+```typescript
+const CONTRACT_ADDRESS = "0x_ADDRESS_HASIL_DEPLOY";
 ```
 
-After setting the variable, you can run the deployment with the Sepolia network:
+### 7️⃣ Interaksi dengan Contract
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
+```bash
+npx hardhat run scripts/interact-sepolia.ts --network sepolia
 ```
+
+---
+
+## 📁 Struktur Project
+
+```
+nft-ijazah/
+├── contracts/
+│   └── VerifikasiIjazah.sol    # Smart contract utama
+├── scripts/
+│   ├── deploy.ts               # Deploy ke local
+│   ├── deploy-sepolia.ts       # Deploy ke Sepolia
+│   ├── interact.ts             # Interaksi local
+│   └── interact-sepolia.ts     # Interaksi Sepolia
+├── test/
+│   └── VerifikasiIjazah.ts     # Unit tests
+├── .env.example                # Environment variables
+└── hardhat.config.ts           # Konfigurasi Hardhat
+```
+
+---
+
+## 📝 Fungsi Smart Contract
+
+| Fungsi                | Deskripsi                             |
+| --------------------- | ------------------------------------- |
+| `tambahIjazah()`      | Menambahkan data ijazah baru          |
+| `verifikasiIjazah()`  | Memverifikasi ijazah dengan hash      |
+| `getIjazah()`         | Mengambil data ijazah berdasarkan NIM |
+| `isIjazahTerdaftar()` | Cek apakah NIM sudah terdaftar        |
+| `invalidasiIjazah()`  | Menonaktifkan ijazah                  |
+
+---
+
+## 🔄 Alur Verifikasi Ijazah
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Upload Ijazah  │ ──▶ │  Generate Hash  │ ──▶ │ Simpan ke       │
+│  (File PDF)     │     │  (SHA-256)      │     │ Blockchain      │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Hasil:         │ ◀── │  Bandingkan     │ ◀── │ Verifikasi      │
+│  Valid/Invalid  │     │  Hash           │     │ (Input Hash)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+---
+
+## 📊 Contoh Data Ijazah
+
+```
+Nama Pemilik  : Holiq Ibrahim
+NIM           : 220320002
+Program Studi : Informatika
+Tahun Lulus   : 2025
+Hash Ijazah   : 368cf965f5808223bc0125f17c0759b829cd47036e47224bdadd756716825732
+Status        : ✅ VALID
+```
+
+---
+
+## 🔗 Link Penting
+
+- **Contract**: https://sepolia.etherscan.io/address/0xdc4b5c8d191a341d9678757d6e81de35f18041b0
+- **Sepolia Faucet**: https://sepoliafaucet.com
+- **Infura**: https://infura.io
+- **Alchemy**: https://alchemy.com
+
+---
+
+## 📄 License
