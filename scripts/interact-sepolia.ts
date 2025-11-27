@@ -1,5 +1,7 @@
 import { network, artifacts } from "hardhat";
 import { createHash } from "crypto";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import "dotenv/config";
 
 /**
@@ -14,9 +16,11 @@ if (!CONTRACT_ADDRESS) {
   process.exit(1);
 }
 
-// Fungsi untuk generate hash SHA-256
-function generateHash(data: string): string {
-  return createHash("sha256").update(data).digest("hex");
+// Fungsi untuk generate hash SHA-256 dari FILE (bukan nama file)
+function generateHashFromFile(filePath: string): string {
+  const absolutePath = resolve(process.cwd(), filePath);
+  const fileBuffer = readFileSync(absolutePath);
+  return createHash("sha256").update(fileBuffer).digest("hex");
 }
 
 // Connect ke Sepolia
@@ -42,12 +46,15 @@ console.log("\n" + "=".repeat(60));
 console.log("1️⃣ MENAMBAHKAN DATA IJAZAH");
 console.log("=".repeat(60));
 
+// Path ke file ijazah PDF
+const IJAZAH_FILE = "ijazah_holiq_ibrahim_220320002.pdf";
+
 const dataIjazah = {
   nim: "220320002",
   namaPemilik: "Holiq Ibrahim",
   prodi: "Informatika",
   tahunLulus: "2025",
-  hashIjazah: generateHash("ijazah_holiq_ibrahim_220320002.pdf"),
+  hashIjazah: generateHashFromFile(IJAZAH_FILE),
 };
 
 console.log("\n📝 Data yang akan ditambahkan:");
@@ -123,9 +130,11 @@ console.log(
   `   Hasil: ${isValid ? "✅ IJAZAH VALID" : "❌ IJAZAH TIDAK VALID"}`
 );
 
-// Test dengan hash yang salah
+// Test dengan hash yang salah (hash dari string random, bukan file)
 console.log("\n🔐 Verifikasi dengan hash PALSU:");
-const hashPalsu = generateHash("ijazah_palsu.pdf");
+const hashPalsu = createHash("sha256")
+  .update("data_palsu_random")
+  .digest("hex");
 const isValidPalsu = (await publicClient.readContract({
   address: CONTRACT_ADDRESS as `0x${string}`,
   abi: artifact.abi,
