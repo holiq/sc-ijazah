@@ -41,44 +41,32 @@ jobs:
             echo "manager=yarn" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
             echo "runner=yarn" >> $GITHUB_OUTPUT
-            exit 0
           elif [ -f "package-lock.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
             echo "command=ci" >> $GITHUB_OUTPUT
             echo "runner=npx --no-install" >> $GITHUB_OUTPUT
-            exit 0
           else
-            echo "Unable to determine package manager"
-            exit 1
+            echo "manager=npm" >> $GITHUB_OUTPUT
+            echo "command=install" >> $GITHUB_OUTPUT
+            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
           fi
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          # Cache based on the detected manager
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
-          # Tell the cache where the lockfile is (in frontend/)
-          cache-dependency-path: |
-            frontend/package-lock.json
-            frontend/yarn.lock
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          # You *may* remove this if you manage next.config yourself
-          static_site_generator: next
 
       - name: Restore cache
         uses: actions/cache@v4
         with:
           path: |
             frontend/.next/cache
-          # Generate a new cache whenever packages or source files change.
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('frontend/**/package-lock.json', 'frontend/**/yarn.lock') }}-${{ hashFiles('frontend/**/*.[jt]s', 'frontend/**/*.[jt]sx') }}
-          # If source files changed but packages didn't, rebuild from a prior cache.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('frontend/package.json') }}-${{ hashFiles('frontend/**/*.[jt]s', 'frontend/**/*.[jt]sx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('frontend/**/package-lock.json', 'frontend/**/yarn.lock') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('frontend/package.json') }}-
 
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
