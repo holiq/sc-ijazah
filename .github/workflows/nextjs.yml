@@ -74,6 +74,8 @@ jobs:
       - name: Build with Next.js
         # For Next 13/14+ static export, ensure next.config has: output: 'export'
         # `next build` will then generate ./frontend/out :contentReference[oaicite:0]{index=0}
+        env:
+          NEXT_PUBLIC_CONTRACT_ADDRESS: ${{ secrets.NEXT_PUBLIC_CONTRACT_ADDRESS }}
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 
       - name: Upload artifact
